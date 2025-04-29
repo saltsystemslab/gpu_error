@@ -30,9 +30,10 @@ __global__ void write_to_log_kernel(uint64_t n_threads){
 
    if (tid >= n_threads) return;
 
-   gpu_log("Logging from thread ", tid, "\n");
+   gpu_assert(tid != (n_threads-1), "Thread id ", tid, " == ", n_threads-1,"\n");
+   //log_error("Logging from thread ", tid, "\n");
 
-
+   if (tid == 0) gpu_error::log("Logging from thread ", tid, "\n");
 
 }
 
@@ -105,7 +106,7 @@ int main(int argc, char** argv) {
 
 
    export_timer.sync_end();
-
+   
 
    export_timer.print_throughput("Exported", num_threads);
 

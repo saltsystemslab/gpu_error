@@ -8,8 +8,8 @@
  */
 
 
-
-
+//enable logging mode
+#define LOG_GPU_ERRORS
 
 #include <gpu_error/log.cuh>
 
@@ -30,9 +30,12 @@ __global__ void write_to_log_kernel(uint64_t n_threads){
 
    if (tid >= n_threads) return;
 
-   gpu_log("Logging from thread ", tid, "\n");
+   gpu_assert(tid == 0, "Thread id ", tid, " != ", 0,"\n");
 
+   gpu_error("I'm just a fatal error from thread ", tid, "\n");
+   //log_error("Logging from thread ", tid, "\n");
 
+   if (tid == 0) gpu_error::log("Logging from thread ", tid, "\n");
 
 }
 
@@ -105,7 +108,7 @@ int main(int argc, char** argv) {
 
 
    export_timer.sync_end();
-
+   
 
    export_timer.print_throughput("Exported", num_threads);
 
@@ -113,8 +116,9 @@ int main(int argc, char** argv) {
 
    printf("%lu logs written\n", log_vector.size());
 
-   std::cout << log_vector[0] << std::endl;
-   std::cout << log_vector[log_vector.size()-1] << std::endl;
+   for (int i = 0; i < log_vector.size(); i++){
+      std::cout << log_vector[i];
+   }
 
 
    cudaDeviceReset();

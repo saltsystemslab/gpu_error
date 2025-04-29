@@ -9,8 +9,6 @@
 
 
 
-
-
 #include <gpu_error/log.cuh>
 
 #include <gallatin/allocators/timer.cuh>
@@ -23,15 +21,29 @@
 
 using namespace gallatin::allocators;
 
-__global__ void write_to_log_kernel(uint64_t n_threads){
+
+__global__ void add_with_assertion(uint64_t n_threads, uint64_t * resource){
 
 
    uint64_t tid = gallatin::utils::get_tid();
 
    if (tid >= n_threads) return;
 
-   gpu_log("Logging from thread ", tid, "\n");
+   gpu_assert(tid < n_threads, "Assertion will never trigger\n");
 
+   atomicAdd((unsigned long long int *)resource, 1ULL);
+
+
+}
+
+__global__ void add_without_assertion(uint64_t n_threads, uint64_t * resource){
+
+
+   uint64_t tid = gallatin::utils::get_tid();
+
+   if (tid >= n_threads) return;
+
+   atomicAdd((unsigned long long int *)resource, 1ULL);
 
 
 }
@@ -87,17 +99,30 @@ int main(int argc, char** argv) {
    gpu_error::init_gpu_log();
 
 
+   uint64_t * resources = gallatin::utils::get_host_version<uint64_t>(2);
+   resources[0] = 0;
+   resources[1] = 1;
+
+   resources = gallatin::utils::move_to_device<uint64_t>(resources, 2);
+
    cudaDeviceSynchronize();
 
-   gallatin::utils::timer log_timer;
+   gallatin::utils::timer assert_timer;
 
-   write_to_log_kernel<<<(num_threads-1)/512+1,512>>>(num_threads);
+   add_with_assertion<<<(num_threads-1)/512+1,512>>>(num_threads, resources);
 
-
-   log_timer.sync_end();
+   assert_timer.sync_end();
    cudaDeviceSynchronize();
 
-   log_timer.print_throughput("Logged", num_threads);
+   gallatin::utils::timer no_assert_timer;
+
+   add_without_assertion<<<(num_threads-1)/512+1,512>>>(num_threads, resources+1);
+
+   no_assert_timer.sync_end();
+   cudaDeviceSynchronize();
+
+   assert_timer.print_throughput("Asserted", num_threads);
+   no_assert_timer.print_throughput("No-Asserted", num_threads);
 
    gallatin::utils::timer export_timer;
 
@@ -105,16 +130,13 @@ int main(int argc, char** argv) {
 
 
    export_timer.sync_end();
-
+   
 
    export_timer.print_throughput("Exported", num_threads);
 
    gpu_error::free_gpu_log();
 
    printf("%lu logs written\n", log_vector.size());
-
-   std::cout << log_vector[0] << std::endl;
-   std::cout << log_vector[log_vector.size()-1] << std::endl;
 
 
    cudaDeviceReset();

@@ -392,12 +392,8 @@ namespace gpu_error {
 		}
 
 		__device__ void print_string_device(){
-
-			for (int i = 0; i < length; i++){
-				printf("%c", chars[i]);
-			}
-
-			printf("\n");
+			
+			printf("%s", chars);
 
 		}
 
@@ -435,7 +431,7 @@ namespace gpu_error {
 			length = first.length;
 
 			chars = first.chars;
-			
+
 			return *this;
 
 		}

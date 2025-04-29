@@ -23,6 +23,7 @@
 
 using namespace gallatin::allocators;
 
+
 __global__ void write_to_log_kernel(uint64_t n_threads){
 
 
@@ -30,7 +31,7 @@ __global__ void write_to_log_kernel(uint64_t n_threads){
 
    if (tid >= n_threads) return;
 
-   gpu_log("Logging from thread ", tid, "\n");
+   gpu_error("Logging from thread ", tid, "\n");
 
 
 
@@ -105,7 +106,7 @@ int main(int argc, char** argv) {
 
 
    export_timer.sync_end();
-
+   
 
    export_timer.print_throughput("Exported", num_threads);
 

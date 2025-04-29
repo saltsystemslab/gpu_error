@@ -19,7 +19,6 @@
 
 #include <string>
 
-
 //This is a logger for cuda! Uses a queue structure to record
 // entries with unbounded length, up to the maximum device memory
 
@@ -100,16 +99,23 @@ namespace gpu_error {
 	static __host__ void init_gpu_log(uint64_t n_bytes=8589934592ULL){
 
 		//initialize allocator.
+
+		#ifndef GPU_NDEBUG
+
 		init_log_allocator(n_bytes);
 
 		log_vector_type * log = log_vector_type::generate_on_device();
 
 		log_singleton::write_instance(log);
 
+		#endif
+
 
 	}
 
 	static __host__ void free_gpu_log(){
+
+		#ifndef GPU_NDEBUG
 
 		log_vector_type * log = log_singleton::read_instance();
 
@@ -119,10 +125,18 @@ namespace gpu_error {
 
 		free_log_allocator();
 
+		#endif
+
 	}
 
 	static __host__ std::vector<std::string> export_log(){
 
+		#ifdef GPU_NDEBUG
+
+			std::vector<std::string> empty_logs;
+			return empty_logs;
+
+		#else
 
 		auto vector_log = log_vector_type::export_to_host(log_singleton::read_instance());
 
@@ -150,6 +164,8 @@ namespace gpu_error {
 
 		return output_strings;
 
+		#endif
+
 	}
 
 	template <typename ... Args>
@@ -162,6 +178,52 @@ namespace gpu_error {
 
 			log_singleton::instance()->insert(new_log_entry);
 
+
+	}
+
+	template <typename ... Args>
+	static __device__ void print_error(Args...all_args){
+
+			#ifdef LOG_GPU_ERRORS
+
+			log<Args...>(all_args...);
+
+			#else
+
+			auto string_message = make_string<Args...>(all_args...);
+
+			string_message.print_string_device();
+
+			__threadfence();
+
+			asm volatile ("trap;");
+
+			#endif
+
+	}
+
+	template <typename ... Args>
+	static __device__ void print_assertion(bool assertion, Args...all_args){
+
+		if (assertion){
+			return;
+		} 
+
+		#ifdef LOG_GPU_ERRORS
+
+		log<Args...>(all_args...);
+
+		#else
+
+		auto string_message = make_string<Args...>(all_args...);
+
+		string_message.print_string_device();
+
+		__threadfence();
+
+		asm volatile ("trap;");
+
+		#endif
 
 	}
 
@@ -306,5 +368,22 @@ namespace gpu_error {
 
 }
 
+#ifdef GPU_NDEBUG
+
+#define gpu_log(...) ((void)0)
+
+#define gpu_error(...) ((void)0)
+
+#define gpu_assert(...) ((void)0)
+
+#else
+
+#define gpu_log(...) gpu_error::log(__VA_ARGS__)
+
+#define gpu_error(...) gpu_error::print_error("\033[1;31mError in file ", __FILE__, " at line ", __LINE__, ": ", __VA_ARGS__, "\033[0m")
+
+#define gpu_assert(BOOL_FLAG, ...) gpu_error::print_assertion(BOOL_FLAG, "\033[1;31mAssertion failed in file ", __FILE__, " at line ", __LINE__, ": ", __VA_ARGS__, "\033[0m")
+
+#endif
 
 #endif //end of log name guard
