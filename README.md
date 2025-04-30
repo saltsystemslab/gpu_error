@@ -21,7 +21,7 @@ This variadic functionality is extended to all logging functions! The size, # of
 
 ## Host API
 
-- `init_gpu_log(optional uint64_t n_bytes)`: intializes the log and backing allocator. This must be called before ANY log, assertion, or error calls are made. Allocator defaults to 8GB of host memory. To allocate more, specify the amount as `n_bytes`.
+- `init_gpu_log(optional uint64_t n_bytes)`: intializes the log and backing allocator. This must be called before ANY log, assertion, or error calls are made. Allocator defaults to 8GB of host memory. To allocate a different amount of memory, specify the amount as `n_bytes`. Specifying a value that is too low many not allow the allocator to initialize correctly: I would recommend at least 1GB.
 - `free_gpu_log`: Release underlying memory of the logging system. After this is called, all other log functionality is disabled. Call this last.
 - `std::vector<std::string> export_log()` - writes all logs in device memory to a host vector as strings. This is not safe for concurrency with the GPU, i.e. call cudaDeviceSynchronize() and ensure no logging kernels are running.
 
@@ -29,7 +29,7 @@ This variadic functionality is extended to all logging functions! The size, # of
 
 ## Device API
 
-All logging functionality obeys strict serial ordering - it is not possible for one thread to write to the log out of order, but there is no enforced ordering between different threads.
+All logging functionality obeys strict serial ordering per-thread. It is not possible for one thread to write to the log out of order, but there is no enforced ordering between different threads.
 
 -  `gpu_log(...)`: construct and store a custring in the log with arguments `...`, where `...` is a variadic template of castable types. Logs are collected in order via an atomicAdd, and the log operation is thread-safe. Logging does not pause execution.
 -  `gpu_error(...)`: construct and store a custring representing an error. This logs the file and line info, similar to a CPU Exception call. In the default mode, this also triggers an `asm volatile(trap;);` call that will pause the debugger on the error and end execution of the kernel in regular programs. If you want errors to be non-fatal, you can use pass the flag `LOG_GPU_ERRORS` to log errors into the log instead. Errors that are logged to not trap and will not pause execution.
