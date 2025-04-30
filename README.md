@@ -21,7 +21,7 @@ This variadic functionality is extended to all logging functions! The size, # of
 
 ## Host API
 
-- `init_gpu_log(optional uint64_t n_bytes)`: intializes the log and backing allocator. This must be called before ANY log, assertion, or error calls are made.
+- `init_gpu_log(optional uint64_t n_bytes)`: intializes the log and backing allocator. This must be called before ANY log, assertion, or error calls are made. Allocator defaults to 8GB of host memory. To allocate more, specify the amount as `n_bytes`.
 - `free_gpu_log`: Release underlying memory of the logging system. After this is called, all other log functionality is disabled. Call this last.
 - `std::vector<std::string> export_log()` - writes all logs in device memory to a host vector as strings. This is not safe for concurrency with the GPU, i.e. call cudaDeviceSynchronize() and ensure no logging kernels are running.
 
