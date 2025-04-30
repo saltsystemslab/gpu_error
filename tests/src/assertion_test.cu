@@ -45,38 +45,6 @@ int main(int argc, char** argv) {
    uint64_t num_threads;
 
 
-   // if (argc < 2){
-   //    num_segments = 1000;
-   // } else {
-   //    num_segments = std::stoull(argv[1]);
-   // }
-
-   // if (argc < 3){
-   //    num_threads = 1000000;
-   // } else {
-   //    num_threads = std::stoull(argv[2]);
-   // }
-
-   // if (argc < 4){
-   //    num_rounds = 1;
-   // } else {
-   //    num_rounds = std::stoull(argv[3]);
-   // }
-
-
-   // if (argc < 5){
-   //    min_size = 16;
-   // } else {
-   //    min_size = std::stoull(argv[4]);
-   // }
-
-   // if (argc < 6){
-   //    max_size = 4096;
-   // } else {
-   //    max_size = std::stoull(argv[5]);
-   // }
-
-
    if (argc < 2){
       printf("Test has each thread write one log. Assert all logs are present.\n");
       printf("Usage: ./tests/global_churn [num_threads]\n");

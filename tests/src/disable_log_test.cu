@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 
    num_threads = std::stoull(argv[1]);
 
-   gpu_error::init_gpu_log();
+   //gpu_error::init_gpu_log();
 
 
    cudaDeviceSynchronize();
@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
 
    export_timer.print_throughput("Exported", num_threads);
 
-   gpu_error::free_gpu_log();
+   //gpu_error::free_gpu_log();
 
    printf("%lu logs written\n", log_vector.size());
 

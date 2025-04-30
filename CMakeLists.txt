@@ -69,7 +69,7 @@ set(CMAKE_CXX_COMPILER $ENV{CXX})
 
 set(GPU_ERR_TESTS_BINARY_DIR "${CMAKE_BINARY_DIR}/tests")
 
-option(GPU_ERR_TESTS "Configure CMake to build tests for the allocator" ON)
+option(GPU_ERR_TESTS "Configure CMake to build tests for the allocator" OFF)
 
 
 if(GPU_ERR_TESTS)

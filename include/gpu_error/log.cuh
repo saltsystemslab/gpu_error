@@ -78,7 +78,15 @@ namespace gpu_error {
 		//assumes log host is on host but custring is maybe not.
 		__host__ std::string export_log(){
 
+			#ifdef GPU_NDEBUG
+
+			std::string my_string;
+
+			#else
+
 			std::string my_string(message.data());
+
+			#endif
 
 			//std::cout << "String is " << my_string << std::endl; 
 			return my_string;

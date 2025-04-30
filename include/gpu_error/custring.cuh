@@ -16,6 +16,26 @@
 //entries maintain TID, logID, and a message generated via 
 namespace gpu_error {
 
+	#ifdef GPU_NDEBUG
+
+	struct custring {
+		char * chars;
+		uint length;
+
+		__host__ __device__ custring(){
+			return;
+		}
+	};
+
+	template <typename ... Args>
+	__device__ custring make_string(Args...all_args){
+
+		custring test_string;
+		return test_string;
+	}
+
+	#else
+
 	//not necessary
 	//const __device__ char digits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 	using namespace gallatin::allocators;
@@ -890,6 +910,8 @@ namespace gpu_error {
 
 
 	}
+
+	#endif
 
 
 
