@@ -71,6 +71,12 @@ set(GPU_ERR_TESTS_BINARY_DIR "${CMAKE_BINARY_DIR}/tests")
 
 option(GPU_ERR_TESTS "Configure CMake to build tests for the allocator" OFF)
 
+option(USE_ASSERTIONS "If enabled, assertions are present. Disabling this removes device-side asserts and errors." OFF)
+
+if (!USE_ASSERTIONS){
+  add_compile_definitions(GPU_NDEBUG)
+}
+
 
 if(GPU_ERR_TESTS)
     add_subdirectory(tests)
