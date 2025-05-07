@@ -77,6 +77,7 @@ if (NOT USE_ASSERTIONS)
 
   message("GPU-side Assertions are Disabled")
   add_compile_definitions(GPU_NDEBUG)
+  add_definitions(-DGPU_NDEBUG) 
 endif()
 
 

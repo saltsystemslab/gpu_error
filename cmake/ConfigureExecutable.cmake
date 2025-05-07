@@ -7,4 +7,16 @@ function(ConfigureGPUErrExecutable EXE_NAME EXE_SRC EXE_DEST)
                                              "${CMAKE_CURRENT_SOURCE_DIR}")
     target_link_libraries(${EXE_NAME} PRIVATE gpu_error)
 
+    if (NOT USE_ASSERTIONS)
+      target_compile_definitions(${EXE_NAME} PRIVATE GPU_NDEBUG)
+    endif()
+
 endfunction(ConfigureGPUErrExecutable)
+
+
+function(ConfigureGPUErrStatus EXE_NAME)
+    if (NOT USE_ASSERTIONS)
+      target_compile_definitions(${EXE_NAME} PRIVATE GPU_NDEBUG)
+    endif()
+
+endfunction(ConfigureGPUErrStatus)
