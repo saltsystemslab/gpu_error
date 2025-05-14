@@ -17,6 +17,8 @@
 
 #include <gpu_error/fixed_vector.cuh>
 
+#include <gpu_error/progress_bar.cuh>
+
 #include <string>
 
 //This is a logger for cuda! Uses a queue structure to record
@@ -153,6 +155,9 @@ namespace gpu_error {
 
 			//printf("Vector log has %lu items\n", vector_log.size());
 
+		printf("Log exported, writing out...\n");
+
+		gpu_error::progress_bar bar("Writing log", vector_log.size(), .01);
 
 		for (uint64_t i = 0; i < vector_log.size(); i++){
 
@@ -166,6 +171,8 @@ namespace gpu_error {
 			// }
 
 			output_strings.push_back(vector_log[i].export_log());
+
+			bar.increment();
 
 
 		}

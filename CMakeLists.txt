@@ -73,12 +73,12 @@ option(GPU_ERR_TESTS "Configure CMake to build tests for the allocator" OFF)
 
 option(USE_ASSERTIONS "If enabled, assertions are present. Disabling this removes device-side asserts and errors." OFF)
 
-if (NOT USE_ASSERTIONS)
+# if (NOT USE_ASSERTIONS)
 
-  message("GPU-side Assertions are Disabled")
-  add_compile_definitions(GPU_NDEBUG)
-  add_definitions(-DGPU_NDEBUG) 
-endif()
+#   message("GPU-side Assertions are Disabled")
+#   add_compile_definitions(GPU_NDEBUG)
+#   add_definitions(-DGPU_NDEBUG) 
+# endif()
 
 
 if(GPU_ERR_TESTS)

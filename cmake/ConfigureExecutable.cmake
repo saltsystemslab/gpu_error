@@ -15,7 +15,10 @@ endfunction(ConfigureGPUErrExecutable)
 
 
 function(ConfigureGPUErrStatus EXE_NAME)
+
     if (NOT USE_ASSERTIONS)
+
+      message("Disabling assertions for ${EXE_NAME}")
       target_compile_definitions(${EXE_NAME} PRIVATE GPU_NDEBUG)
     endif()
 
