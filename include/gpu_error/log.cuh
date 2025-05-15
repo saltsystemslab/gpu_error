@@ -105,8 +105,10 @@ namespace gpu_error {
 
 	using log_singleton = gpu_singleton<log_vector_type *>;
 
+	
+	using lw_log_singleton = gpu_singleton<uint64_t *>;
 
-	static __host__ void init_gpu_log(uint64_t n_bytes=8589934592ULL){
+	static __host__ void init_gpu_log(uint64_t n_bytes=8589934592ULL, uint64_t n_lw_logs = 32){
 
 		//initialize allocator.
 
@@ -118,6 +120,16 @@ namespace gpu_error {
 
 		log_singleton::write_instance(log);
 
+		uint64_t * lw_log;
+
+		cudaMallocManaged((void **)&lw_log, sizeof(uint64_t)*(n_lw_logs+1));
+
+		lw_log[0] = n_lw_logs;
+		for (uint64_t i = 0; i < n_lw_logs; i++){
+			lw_log[i+1] = 0;
+		}
+
+		lw_log_singleton::write_instance(lw_log);
 		#endif
 
 
@@ -134,6 +146,10 @@ namespace gpu_error {
 		log_vector_type::free_on_device(log);
 
 		free_log_allocator();
+
+		cudaFree(lw_log_singleton::read_instance());
+
+		lw_log_singleton::write_instance(nullptr);
 
 		#endif
 
@@ -183,6 +199,51 @@ namespace gpu_error {
 
 	}
 
+	static __host__ void print_events(){
+
+		uint64_t * event_logs = lw_log_singleton::read_instance();
+
+		uint64_t n_events = event_logs[0];
+
+		for (uint64_t i = 0; i < n_events; i++){
+
+			if (event_logs[i+1] != 0){
+				std::cout << "[EVENT " << i << "]: occurred " << event_logs[i+1] << " times" << std::endl;
+			}
+			
+		}
+
+	}
+
+	static __host__ uint64_t count_events(){
+
+		uint64_t * event_logs = lw_log_singleton::read_instance();
+
+		uint64_t n_events = event_logs[0];
+
+		uint64_t count = 0;
+
+		for (uint64_t i = 0; i < n_events; i++){
+			count += event_logs[i+1];
+		}
+
+		return count;
+
+	}
+
+	static __host__ void clear_events(){
+
+		uint64_t * event_logs = lw_log_singleton::read_instance();
+
+		uint64_t n_events = event_logs[0];
+
+
+		for (uint64_t i = 0; i < n_events; i++){
+			event_logs[i+1] = 0;
+		}
+
+	}
+
 	template <typename ... Args>
 	static __device__ void log(Args...all_args){
 
@@ -193,6 +254,12 @@ namespace gpu_error {
 
 			log_singleton::instance()->insert(new_log_entry);
 
+
+	}
+
+	static __device__ void lw_log(uint64_t log_value){
+
+		atomicAdd((unsigned long long int *) &lw_log_singleton::instance()[log_value+1],(unsigned long long int) 1);
 
 	}
 
@@ -385,6 +452,8 @@ namespace gpu_error {
 
 #ifdef GPU_NDEBUG
 
+#define count_event(...) ((void)0)
+
 #define gpu_log(...) ((void)0)
 
 #define gpu_error(...) ((void)0)
@@ -392,6 +461,8 @@ namespace gpu_error {
 #define gpu_assert(...) ((void)0)
 
 #else
+
+#define count_event(x) gpu_error::lw_log(x)
 
 #define gpu_log(...) gpu_error::log(__VA_ARGS__)
 
