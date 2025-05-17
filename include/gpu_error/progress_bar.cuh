@@ -36,6 +36,7 @@ namespace gpu_error {
 
 			next_interval = 0;
 			interval_amount = n_items*update_interval;
+			if (interval_amount == 0) interval_amount = 1;
 
 		}
 

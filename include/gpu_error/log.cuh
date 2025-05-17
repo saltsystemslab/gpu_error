@@ -201,6 +201,16 @@ namespace gpu_error {
 
 	static __host__ void print_events(){
 
+		#if GPU_NDEBUG
+
+		std::cout << "Events are not being tracked due to GPU_NDEBUG flag. " << std::endl;
+		return;
+
+		#else
+
+		std::cout << "Event counts: " << std::endl;
+		std::cout << "==========================" << std::endl;
+
 		uint64_t * event_logs = lw_log_singleton::read_instance();
 
 		uint64_t n_events = event_logs[0];
@@ -213,9 +223,20 @@ namespace gpu_error {
 			
 		}
 
+		std::cout << "==========================" << std::endl;
+
+		#endif
+
 	}
 
 	static __host__ uint64_t count_events(){
+
+		#if GPU_NDEBUG
+
+		std::cout << "Events are not being tracked due to GPU_NDEBUG flag. " << std::endl;
+		return 0;
+
+		#else
 
 		uint64_t * event_logs = lw_log_singleton::read_instance();
 
@@ -229,9 +250,17 @@ namespace gpu_error {
 
 		return count;
 
+		#endif
+
 	}
 
 	static __host__ void clear_events(){
+
+		#if GPU_NDEBUG
+
+		return;
+
+		#else
 
 		uint64_t * event_logs = lw_log_singleton::read_instance();
 
@@ -241,6 +270,8 @@ namespace gpu_error {
 		for (uint64_t i = 0; i < n_events; i++){
 			event_logs[i+1] = 0;
 		}
+
+		#endif
 
 	}
 
