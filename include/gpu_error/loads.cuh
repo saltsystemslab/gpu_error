@@ -75,9 +75,6 @@ public:
     }
 };
 
-
-
-
 }
 
 // Custom load/store operators for different data sizes
