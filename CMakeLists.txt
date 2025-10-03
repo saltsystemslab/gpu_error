@@ -23,9 +23,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 endif()
 
-set(GPU_ARCHS "")
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/EvalGpuArchs.cmake)
+if (DEFINED GPU_ARCHS)
+  message("GPU_ARCHS is defined as ${GPU_ARCHS}")
+else()
+  message("GPU_ARCHS not specified, auto-detecting GPU...")
+  set(GPU_ARCHS "")
+  include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/EvalGpuArchs.cmake)
   evaluate_gpu_archs(GPU_ARCHS)
+endif()
 
 #set(CUDA_TOOLKIT_ROOT_DIR /usr/local/cuda-12.1)
 
