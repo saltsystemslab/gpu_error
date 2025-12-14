@@ -26,6 +26,9 @@
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+#include <cooperative_groups.h>
+
+namespace cg = cooperative_groups;
 
 namespace gpu_error {
 
