@@ -16,6 +16,7 @@ struct host_constructor {
     __host__ operator T*() {
         T* host_ptr;
         cudaMallocHost(&host_ptr, sizeof(T) * size_param);
+        cudaMemset(host_ptr, 0, sizeof(T) * size_param);
         return host_ptr;
     }
 };
@@ -37,6 +38,7 @@ struct device_constructor {
     __host__ operator T*() {
         T* device_ptr;
         cudaMalloc(&device_ptr, sizeof(T) * size_param);
+        cudaMemset(device_ptr, 0, sizeof(T) * size_param);
         return device_ptr;
     }
 };
