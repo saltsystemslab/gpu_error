@@ -10,6 +10,7 @@
 // alloc utils needed for easy host_device transfer
 // and the global allocator
 #include <gallatin/allocators/alloc_utils.cuh>
+#include <gallatin/allocators/global_allocator.cuh>
 #include <gpu_error/custring.cuh>
 #include <gpu_error/fixed_vector.cuh>
 #include <gpu_error/global_alloc_singleton.cuh>
@@ -275,9 +276,17 @@ static __device__ void print_error(Args... all_args) {
 
 template <typename... Args>
 static __device__ void print_assertion(bool assertion, Args... all_args) {
-  if (assertion) {
-    return;
+
+
+  if (assertion) return;
+
+  if (host_mem_allocator_type::instance() == nullptr){
+    //If you trapped here, you failed to init the allocator.
+    // call "init_gpu_log();"
+    asm volatile("trap;");
   }
+
+
 
 #ifdef LOG_GPU_ERRORS
 

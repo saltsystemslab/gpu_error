@@ -497,8 +497,6 @@ struct custring {
   __device__ static custring make_empty_string(uint64_t max_length) {
     custring empty_string;
 
-    if (max_length == 0) return;
-
     // one extra byte for \0 endstr
     char *data = (char *)hmalloc(max_length + 1);
 
@@ -706,8 +704,6 @@ __device__ uint64_t add_to_string_variadic(custring &target, uint64_t length,
 template <typename... Args>
 __device__ custring make_string(Args... all_args) {
   uint64_t size = custring_est_size<Args...>(all_args...);
-
-  // printf("Size is bounded by %lu\n", size);
 
   custring test_string = custring::make_empty_string(size);
 
