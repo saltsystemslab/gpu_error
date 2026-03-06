@@ -497,7 +497,10 @@ struct custring {
   __device__ static custring make_empty_string(uint64_t max_length) {
     custring empty_string;
 
-    if (max_length == 0) return;
+    if (max_length == 0){
+      asm volatile ("trap;");
+      return empty_string;
+    }
 
     // one extra byte for \0 endstr
     char *data = (char *)hmalloc(max_length + 1);
